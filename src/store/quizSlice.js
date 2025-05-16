@@ -1,25 +1,18 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
+import { fetchQuestions } from '../services/quizService'
 
 
 const initialQuestions = [
-  { id: 1, subject: 'General Studies Paper - I', type: 'mcq', text: `According to the Environmental Protection
-Agency (EPA), which one of the following is
-the largest source of sulphur dioxide
-emissions ?`, options: [' Locomotives using fossil fuels','Ships using fossil fuels',' Extraction of metals from ores',' Power plants using fossil fuels'] },
-  { id: 2, subject: 'General Studies Paper - I', type: 'numeric', text: 'Q2 text...' },
-  { id: 3, subject: 'General Studies Paper - I', type: 'mcq', text: 'Q3 text...', options: ['A','B','C','D'] },
-  { id: 4, subject: 'General Studies Paper - I', type: 'mcq', text: 'Q4 text...', options: ['A','B','C','D'] },
-  { id: 5, subject: 'General Studies Paper - I', type: 'mcq', text: `According to the Environmental Protection
-    Agency (EPA), which one of the following is
-    the largest source of sulphur dioxide
-    emissions ?`, options: [' Locomotives using fossil fuels','Ships using fossil fuels',' Extraction of metals from ores',' Power plants using fossil fuels'] },
-  { id: 6, subject: 'General Studies Paper - I', type: 'mcq', text: 'Q6 text...', options: ['A','B','C','D'] },
-  { id: 7, subject: 'General Studies Paper - I', type: 'mcq', text: 'Q7 text...', options: ['A','B','C','D'] },
-  { id: 8, subject: 'General Studies Paper - I', type: 'mcq', text: 'Q8 text...', options: ['A','B','C','D'] },
-  { id: 9, subject: 'General Studies Paper - I', type: 'mcq', text: 'Q9 text...', options: ['A','B','C','D'] },
-  { id: 10, subject: 'General Studies Paper - I', type: 'mcq', text: 'Q10 text...', options: ['A','B','C','D'] },
-  
+  { id: 1, subject: 'Initial Question', type: 'numeric', text: `Initial Question` } 
 ]
+
+export const loadQuestions = createAsyncThunk(
+    'quiz/loadQuestions',
+    async () => {
+      const data = await fetchQuestions()
+      return data
+    }
+  )
 
 const quizSlice = createSlice({
   name: 'quiz',
@@ -31,16 +24,25 @@ const quizSlice = createSlice({
       totalSeconds: 3600,
       remaining: 3600,
       running: false,
+      lastTick: null
     },
     showInstructions: false,
+    loading: false,
+    error: null
   },
   reducers: {
     startTimer(state) {
       state.timer.running = true
+      state.timer.lastTick = Date.now()
     },
     tick(state) {
       if (state.timer.running && state.timer.remaining > 0) {
-        state.timer.remaining--
+        const now = Date.now()
+        const elapsed = Math.floor((now - state.timer.lastTick) / 1000)
+        if (elapsed >= 1) {
+          state.timer.remaining = Math.max(0, state.timer.remaining - elapsed)
+          state.timer.lastTick = now
+        }
       }
     },
     configureTimer(state, action) {
@@ -72,6 +74,21 @@ const quizSlice = createSlice({
       state.timer.running = false
     },
   },
+  extraReducers: (builder) => {
+    builder
+      .addCase(loadQuestions.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(loadQuestions.fulfilled, (state, action) => {
+        state.loading = false
+        state.questions = action.payload
+      })
+      .addCase(loadQuestions.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.error.message
+      })
+  }
 })
 
 export const {

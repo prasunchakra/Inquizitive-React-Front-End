@@ -16,7 +16,7 @@ export default function PaletteItem({ question, index }) {
       onClick={() => dispatch(navigate(index))}
       className={`${bg} p-2 text-center rounded cursor-pointer hover:bg-blue-200 `}
     >
-      { question.id }
+      {index + 1}
     </button>
   )
 }

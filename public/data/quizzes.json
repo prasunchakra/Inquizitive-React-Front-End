@@ -1,0 +1,20 @@
+[
+    {
+      "id": 1,
+      "title": "JEE Main Mock Test - 1",
+      "tagline": "Ace your JEE Main preparation!",
+      "path": "/landing?title=JEE%20MAIN%20MOCK%20TEST%20-%201"
+    },
+    {
+      "id": 2,
+      "title": "NEET Mock Test",
+      "tagline": "Get ready for NEET excellence",
+      "path": "/landing?title=NEET%20Mock%20Test"
+    },
+    {
+      "id": 3,
+      "title": "GATE Practice Quiz",
+      "tagline": "Sharpen your GATE skills",
+      "path": "/landing?title=GATE%20Practice%20Quiz"
+    }
+  ]

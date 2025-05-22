@@ -6,11 +6,25 @@ const initialQuestions = [
   { id: 1, subject: 'Initial Question', type: 'numeric', text: `Initial Question` } 
 ]
 
+// Convert HH:MM:SS to seconds
+function timeToSeconds(timeStr) {
+  const [hours, minutes, seconds] = timeStr.split(':').map(Number)
+  return hours * 3600 + minutes * 60 + seconds
+}
+
 export const loadQuestions = createAsyncThunk(
     'quiz/loadQuestions',
     async () => {
       const data = await fetchQuestions()
-      return data
+      return {
+        questions: data.questions,
+        quizInfo: {
+          name: data.title,
+          duration: data.duration,
+          totalMarks: data.total_marks,
+          instructions: data.description
+        }
+      }
     }
   )
 
@@ -18,6 +32,12 @@ const quizSlice = createSlice({
   name: 'quiz',
   initialState: {
     questions: initialQuestions,
+    quizInfo: {
+      name: '',
+      duration: '01:00:00', // Default duration in HH:MM:SS
+      totalMarks: 0,
+      instructions: ''
+    },
     answers: {},                    // { [questionId]: { answer, reviewed } }
     currentQ: 0,
     timer: {                       
@@ -46,8 +66,9 @@ const quizSlice = createSlice({
       }
     },
     configureTimer(state, action) {
-      state.timer.totalSeconds = action.payload
-      state.timer.remaining = action.payload
+      const seconds = timeToSeconds(action.payload)
+      state.timer.totalSeconds = seconds
+      state.timer.remaining = seconds
     },
     pauseTimer(state) {
       state.timer.running = false
@@ -82,7 +103,12 @@ const quizSlice = createSlice({
       })
       .addCase(loadQuestions.fulfilled, (state, action) => {
         state.loading = false
-        state.questions = action.payload
+        state.questions = action.payload.questions
+        state.quizInfo = action.payload.quizInfo
+        // Configure timer based on quiz duration
+        const seconds = timeToSeconds(action.payload.quizInfo.duration)
+        state.timer.totalSeconds = seconds
+        state.timer.remaining = seconds
       })
       .addCase(loadQuestions.rejected, (state, action) => {
         state.loading = false

@@ -2,7 +2,7 @@ import React from 'react'
 import { useSelector } from 'react-redux'
 
 export default function ResultPage() {
-  const { questions, answers } = useSelector(s => s.quiz)
+  const { questions, answers, quizInfo } = useSelector(s => s.quiz)
   const total = questions.length
   const answered = Object.values(answers).filter(a => a.answer != null).length
   const left = total - answered
@@ -22,12 +22,12 @@ export default function ResultPage() {
     <div className="p-6 space-y-6">
       <header className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Civil Services (Preliminary) Mock Examination</h1>
+          <h1 className="text-2xl font-bold">{quizInfo.name}</h1>
           {/* <Link to="/exam" className="text-blue-600 underline text-sm">Re-Attempt Test</Link> */}
         </div>
         <div className="text-right">
-          <p>Total Time: 3:00 hrs</p>
-          <p>Total Marks: 719</p>
+          <p>Total Time: {quizInfo.duration}</p>
+          <p>Total Marks: {quizInfo.totalMarks}</p>
         </div>
       </header>
 
